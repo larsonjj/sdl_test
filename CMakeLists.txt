@@ -62,6 +62,9 @@ add_git_dependency(
 
 # Add Box2d
 option(BOX2D_BUILD_TESTBED "" OFF)
+option(BOX2D_BUILD_UNIT_TESTS "" OFF)
+option(BOX2D_BUILD_EXAMPLES "" OFF)
+option(BOX2D_BUILD_DOCS "" OFF)
 add_git_dependency(
         box2d
         https://github.com/erincatto/box2d.git
@@ -79,7 +82,7 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/s
 # Define PROJECT_INCLUDE to be the path to the include directory of the project
 set(PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/sources/")
 
-add_executable(${PROJECT_NAME} sources/main.cpp)
+add_executable(${PROJECT_NAME} sources/main.cpp sources/Window.h)
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 
@@ -126,7 +129,7 @@ if (EMSCRIPTEN)
     # Tell Emscripten to build an .html file.
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sUSE_SDL=2 -sASSERTIONS=1 -sWASM=1 -Os -Wall -sTOTAL_MEMORY=67108864 -sFORCE_FILESYSTEM=1 --preload-file ${resource_dir} --shell-file ../sources/minshell.html")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sUSE_SDL=2 -sASSERTIONS=1 -sWASM=1 -Os -Wall -sTOTAL_MEMORY=67108864 -sFORCE_FILESYSTEM=1 --preload-file ${resource_dir} --shell-file ${CMAKE_CURRENT_LIST_DIR}/sources/minshell.html")
     set(CMAKE_EXECUTABLE_SUFFIX ".html") # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
     target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH=/${resource_dir}/) # Set the asset path macro in release mode to a relative path that assumes the assets folder is in the same directory as the game executable
