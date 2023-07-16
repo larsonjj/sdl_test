@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(sdl_test)
+project(sdl_test VERSION  0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,24 +23,45 @@ function(add_git_dependency libName gitURL gitTag)
 endfunction()
 
 # Add SDL
-set(BUILD_SHARED_LIBS OFF) # don't build the shared library for SDL
+option(BUILD_SHARED_LIBS "" OFF) # don't build the shared library for SDL
 add_git_dependency(
         SDL2
         https://github.com/libsdl-org/SDL.git
         release-2.28.1
 )
 
-#set(BUILD_SHARED_LIBS OFF) # don't build the shared library for SDL
-#set(SDL2IMAGE_INSTALL OFF) #disable install target for SDL Image
-## Add SDL Image
-#add_git_dependency(
-#        SDL2_image
-#        https://github.com/libsdl-org/SDL_image.git
-#        release-2.6.3
-#)
+option(SDL2IMAGE_BUILD_SHARED_LIBS "" OFF) # don't build the shared library for SDL_image
+option(SDL2IMAGE_INSTALL "" OFF) # disable install target for SDL Image
+# Add SDL Image
+add_git_dependency(
+        SDL2_image
+        https://github.com/libsdl-org/SDL_image.git
+        release-2.6.3
+)
+
+option(SDL2MIXER_VENDORED "" ON)
+option(SDL2MIXER_BUILD_SHARED_LIBS "" OFF)
+option(SDL2MIXER_OPUS "" OFF)
+#option(SDL2MIXER_OPUS_SHARED "" OFF)
+option(SDL2MIXER_FLAC_LIBFLAC "" OFF)
+#option(SDL2MIXER_FLAC_LIBFLAC_SHARED "" OFF)
+# Add SDL Mixer
+add_git_dependency(
+        SDL2_mixer
+        https://github.com/libsdl-org/SDL_mixer.git
+        release-2.6.3
+)
+
+option(SDL2TTF_BUILD_SHARED_LIBS "" OFF)
+option(SDL2TTF_VENDORED "" ON)
+add_git_dependency(
+        SDL2_ttf
+        https://github.com/libsdl-org/SDL_ttf.git
+        release-2.20.2
+)
 
 # Add Box2d
-set(BOX2D_BUILD_TESTBED OFF)
+option(BOX2D_BUILD_TESTBED "" OFF)
 add_git_dependency(
         box2d
         https://github.com/erincatto/box2d.git
@@ -69,7 +90,7 @@ add_executable(${PROJECT_NAME} sources/main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} fmt::fmt box2d SDL2::SDL2main SDL2::SDL2-static)
+target_link_libraries(${PROJECT_NAME} fmt::fmt box2d SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static freetype SDL2_ttf::SDL2_ttf-static)
 
 ##########################################################################################
 # Project build settings
