@@ -5,25 +5,54 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ##########################################################################################
-# Add dependencies with CPM
+# Add dependencies with FetchContent
 ##########################################################################################
 
-# Fetch CPM
+include(FetchContent)
+set(FETCHCONTENT_QUIET FALSE)
 
-set(CPM_DOWNLOAD_VERSION 0.38.2)
-set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
-if (NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
-    message(STATUS "Downloading CPM.cmake v${CPM_DOWNLOAD_VERSION}")
-    file(DOWNLOAD https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
-endif ()
-include(${CPM_DOWNLOAD_LOCATION})
+function(add_git_dependency libName gitURL gitTag)
+    FetchContent_Declare(${libName}
+            GIT_REPOSITORY ${gitURL}
+            GIT_TAG        ${gitTag}
+            GIT_SHALLOW    TRUE
+            GIT_PROGRESS   TRUE
+            )
+    FetchContent_MakeAvailable(${libName})
+#    target_compile_options(${libName} PUBLIC "-w")
+endfunction()
 
-# Add dependencies
-CPMAddPackage("gh:fmtlib/fmt#10.0.0")
-CPMAddPackage(
-        GITHUB_REPOSITORY erincatto/box2d
-        VERSION 2.4.1
-        OPTIONS "BOX2D_BUILD_TESTBED OFF" "BOX2D_BUILD_UNIT_TESTS OFF" "BOX2D_BUILD_DOCS OFF" "BOX2D_BUILD_EXAMPLES OFF")
+# Add SDL
+set(BUILD_SHARED_LIBS OFF) # don't build the shared library for SDL
+add_git_dependency(
+        SDL2
+        https://github.com/libsdl-org/SDL.git
+        release-2.28.1
+)
+
+#set(BUILD_SHARED_LIBS OFF) # don't build the shared library for SDL
+#set(SDL2IMAGE_INSTALL OFF) #disable install target for SDL Image
+## Add SDL Image
+#add_git_dependency(
+#        SDL2_image
+#        https://github.com/libsdl-org/SDL_image.git
+#        release-2.6.3
+#)
+
+# Add Box2d
+set(BOX2D_BUILD_TESTBED OFF)
+add_git_dependency(
+        box2d
+        https://github.com/erincatto/box2d.git
+        v2.4.1
+)
+
+# Add {fmt} library
+add_git_dependency(
+        fmt
+        https://github.com/fmtlib/fmt.git
+        10.0.0
+)
 
 ##########################################################################################
 # Project executable setup
@@ -36,11 +65,11 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/s
 # Define PROJECT_INCLUDE to be the path to the include directory of the project
 set(PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/sources/")
 
-add_executable(${PROJECT_NAME})
+add_executable(${PROJECT_NAME} sources/main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} fmt::fmt box2d)
+target_link_libraries(${PROJECT_NAME} fmt::fmt box2d SDL2::SDL2main SDL2::SDL2-static)
 
 ##########################################################################################
 # Project build settings
