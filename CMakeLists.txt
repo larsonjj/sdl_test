@@ -68,13 +68,6 @@ add_git_dependency(
         v2.4.1
 )
 
-# Add {fmt} library
-add_git_dependency(
-        fmt
-        https://github.com/fmtlib/fmt.git
-        10.0.0
-)
-
 ##########################################################################################
 # Project executable setup
 ##########################################################################################
@@ -90,7 +83,7 @@ add_executable(${PROJECT_NAME} sources/main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} fmt::fmt box2d SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static freetype SDL2_ttf::SDL2_ttf-static)
+target_link_libraries(${PROJECT_NAME} box2d SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static freetype SDL2_ttf::SDL2_ttf-static)
 
 ##########################################################################################
 # Project build settings
