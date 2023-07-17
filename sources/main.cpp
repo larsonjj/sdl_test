@@ -1,49 +1,48 @@
-#include "Window.h"
-#include <SDL.h>
+#include <SDL2/SDL.h>
+#include <SDL_ttf.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
-void handleInput(bool &shouldQuit) {
-    std::optional<SDL_Event> event;
-    while ((event = Window::pollEvent()))
-        switch (event->type) {
-            case SDL_QUIT:
-                shouldQuit = true;
-                break;
-        }
-}
+SDL_Window *window;
+SDL_Renderer *renderer;
 
-void updateFrame(bool &shouldQuit) {
-    // Input
-    handleInput(shouldQuit);
-    // Update
-    // Render
-}
-
-int main(int argc, char* args[]) {
-    try {
-        // Application Start
-        Window window("SDL Test");
-
-        // Application Loop
-#ifdef __EMSCRIPTEN__
-        emscripten_set_main_loop(updateFrame, 0, 1);
-#else
-        bool shouldQuit = false;
-        while (!shouldQuit) {
-            updateFrame(shouldQuit)
-        }
-#endif
-    } catch (const std::exception &exception) {
-        auto errorMessage = exception.what();
-        SDL_LogCritical(SDL_LogCategory::SDL_LOG_CATEGORY_ERROR, "%s", errorMessage);
-        SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags::SDL_MESSAGEBOX_ERROR, "Error Message", errorMessage, nullptr);
-        SDL_Quit();
-        return 1;
+bool handle_events() {
+    SDL_Event event;
+    SDL_PollEvent(&event);
+    if (event.type == SDL_QUIT) {
+        return false;
     }
+    return true;
+}
 
-    // Must be called even if all subsystems are shut down
+void run_main_loop() {
+#ifdef __EMSCRIPTEN__
+    SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas", SDL_HINT_OVERRIDE);
+    emscripten_set_main_loop([]() { handle_events(); }, 0, true);
+#else
+    while (handle_events())
+        ;
+#endif
+}
+
+int main(int argc, char *argv[]) {
+    SDL_Init(SDL_INIT_VIDEO);
+#ifdef __EMSCRIPTEN__
+    SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas", SDL_HINT_OVERRIDE);
+#endif
+
+    SDL_CreateWindowAndRenderer(300, 300, 0, &window, &renderer);
+
+    SDL_SetRenderDrawColor(renderer, /* RGBA: green */ 0x00, 0x80, 0x00, 0xFF);
+    SDL_Rect rect = {.x = 10, .y = 10, .w = 150, .h = 100};
+    SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderPresent(renderer);
+
+    run_main_loop();
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
 }

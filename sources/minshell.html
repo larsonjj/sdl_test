@@ -32,12 +32,12 @@
 
     <style>
         body {
-            margin: 0px;
+            margin: 0;
             text-align: center;
         }
 
         canvas.emscripten {
-            border: 0px none;
+            border: 0 none;
             background-color: black;
         }
     </style>
@@ -63,8 +63,8 @@
     </script>
 </head>
 <body>
-<canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
-<p id="output"/>
+<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+<p id="output"></p>
 <script>
     var Module = {
         print: (function () {
@@ -79,11 +79,11 @@
                 }
             };
         })(),
-        canvas: (function () {
-            var canvas = document.getElementById('canvas');
-            return canvas;
-        })()
+        canvas: document.getElementById('canvas'),
     };
+    // Module.preRun.push(function () {
+    //     ENV.SDL_EMSCRIPTEN_KEYBOARD_ELEMENT = '#canvas';
+    // });
 </script>
 {{{ SCRIPT }}}
 </body>
