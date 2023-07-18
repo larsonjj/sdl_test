@@ -6,10 +6,18 @@
 
 #define MOVE_SPEED 500
 
-typedef struct Vector2 {
+struct Position
+{
     float x;
     float y;
-} Position, Size2;
+};
+
+struct Size2
+{
+    float x;
+    float y;
+};
+
 
 int run_game(SDL_Renderer *renderer);
 void main_loop();
@@ -63,8 +71,8 @@ int run_game(SDL_Renderer *renderer) {
 
     flecs::entity Player = world.entity();
 
-    Player.set<Position>({10, 20})
-            .set<Size2>({1, 2});
+    Player.set<Position>({20, 20})
+            .set<Size2>({32, 32});
 
     world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
         // Get keyboard state
