@@ -6,14 +6,12 @@
 
 #define MOVE_SPEED 500
 
-struct Position
-{
+struct Position {
     float x;
     float y;
 };
 
-struct Size2
-{
+struct Size2 {
     float x;
     float y;
 };
@@ -57,11 +55,11 @@ int run_game(SDL_Renderer *renderer) {
     world.set_context(renderer);
 
     flecs::entity OnUpdate = world.entity()
-                                    .add(flecs::Phase)
-                                    .depends_on(flecs::OnUpdate);
+                                     .add(flecs::Phase)
+                                     .depends_on(flecs::OnUpdate);
     flecs::entity BeforeDraw = world.entity()
-                                      .add(flecs::Phase)
-                                      .depends_on(OnUpdate);
+                                       .add(flecs::Phase)
+                                       .depends_on(OnUpdate);
     flecs::entity OnDraw = world.entity()
                                    .add(flecs::Phase)
                                    .depends_on(BeforeDraw);
