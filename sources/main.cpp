@@ -24,7 +24,7 @@ struct Size2 {
 int run_game(SDL_Renderer *renderer);
 void main_loop();
 
-// flag for the gameloop
+// flag for the game loop
 bool running = false;
 // Create a world
 flecs::world world;
@@ -88,27 +88,27 @@ int run_game(SDL_Renderer *renderer) {
 
     world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
         // Get keyboard state
-        const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
+        const Uint8 *key_state = SDL_GetKeyboardState(nullptr);
         // movement peed limiter
         float speed_limiter = 1.0;
         for (auto i: it) {
-            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT]) ||
-                (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT]) ||
-                (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT]) ||
-                (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
+            if ((key_state[SDL_SCANCODE_UP] && key_state[SDL_SCANCODE_LEFT]) ||
+                (key_state[SDL_SCANCODE_UP] && key_state[SDL_SCANCODE_RIGHT]) ||
+                (key_state[SDL_SCANCODE_DOWN] && key_state[SDL_SCANCODE_RIGHT]) ||
+                (key_state[SDL_SCANCODE_DOWN] && key_state[SDL_SCANCODE_LEFT])) {
                 speed_limiter = 0.707;
             }
 
-            if (keystate[SDL_SCANCODE_UP]) {
+            if (key_state[SDL_SCANCODE_UP]) {
                 p[i].y -= MOVE_SPEED * speed_limiter * it.delta_time();
             }
-            if (keystate[SDL_SCANCODE_DOWN]) {
+            if (key_state[SDL_SCANCODE_DOWN]) {
                 p[i].y += MOVE_SPEED * speed_limiter * it.delta_time();
             }
-            if (keystate[SDL_SCANCODE_LEFT]) {
+            if (key_state[SDL_SCANCODE_LEFT]) {
                 p[i].x -= MOVE_SPEED * speed_limiter * it.delta_time();
             }
-            if (keystate[SDL_SCANCODE_RIGHT]) {
+            if (key_state[SDL_SCANCODE_RIGHT]) {
                 p[i].x += MOVE_SPEED * speed_limiter * it.delta_time();
             }
         }
