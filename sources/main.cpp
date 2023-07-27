@@ -40,7 +40,11 @@ int main(int argc, char *argv[]) {
     }
 
 #ifdef __EMSCRIPTEN__
-    SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas", SDL_HINT_OVERRIDE);
+    if (SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas",
+                                SDL_HINT_OVERRIDE) < 0) {
+        printf("SDL_SetHint failed: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
 #endif
     // Setup window
     SDL_Window *window =
