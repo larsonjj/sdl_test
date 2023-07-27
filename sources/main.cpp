@@ -37,12 +37,9 @@ int main(int argc, char *argv[]) {
     SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas", SDL_HINT_OVERRIDE);
 #endif
     // Setup window
-    SDL_Window *window = SDL_CreateWindow(
-            "Flecs Web Demo!",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH, SCREEN_HEIGHT,
-            SDL_WINDOW_RESIZABLE);
+    SDL_Window *window =
+            SDL_CreateWindow("Flecs Web Demo!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                             SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
     // Setup renderer
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     // Setup and run the game
@@ -59,23 +56,14 @@ int run_game(SDL_Renderer *renderer) {
     // Set Sdl renderer as ecs context
     world.set_context(renderer);
 
-    flecs::entity OnUpdate = world.entity()
-                                     .add(flecs::Phase)
-                                     .depends_on(flecs::OnUpdate);
-    flecs::entity BeforeDraw = world.entity()
-                                       .add(flecs::Phase)
-                                       .depends_on(OnUpdate);
-    flecs::entity OnDraw = world.entity()
-                                   .add(flecs::Phase)
-                                   .depends_on(BeforeDraw);
-    flecs::entity AfterDraw = world.entity()
-                                      .add(flecs::Phase)
-                                      .depends_on(OnDraw);
+    flecs::entity OnUpdate = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);
+    flecs::entity BeforeDraw = world.entity().add(flecs::Phase).depends_on(OnUpdate);
+    flecs::entity OnDraw = world.entity().add(flecs::Phase).depends_on(BeforeDraw);
+    flecs::entity AfterDraw = world.entity().add(flecs::Phase).depends_on(OnDraw);
 
     flecs::entity Player = world.entity();
 
-    Player.set<Position>({20, 20})
-            .set<Size2>({32, 32});
+    Player.set<Position>({20, 20}).set<Size2>({32, 32});
 
     world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
         // Get keyboard state
@@ -83,7 +71,10 @@ int run_game(SDL_Renderer *renderer) {
         // movement peed limiter
         float speed_limiter = 1.0;
         for (auto i: it) {
-            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT]) || (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
+            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT]) ||
+                (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT]) ||
+                (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT]) ||
+                (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
                 speed_limiter = 0.707;
             }
 
@@ -102,22 +93,24 @@ int run_game(SDL_Renderer *renderer) {
         }
     });
 
-    world.system<Position, Size2>("DrawPlayer").kind(OnDraw).iter([](flecs::iter &it, Position *p, Size2 *s) {
-        SDL_Renderer *renderer = static_cast<SDL_Renderer *>(it.world().get_context());
-        // Drawing each player
-        for (auto i: it) {
-            // Creating a new Rectangle
-            SDL_Rect r;
-            r.x = (int) p[i].x;
-            r.y = (int) p[i].y;
-            r.w = (int) s[i].x;
-            r.h = (int) s[i].y;
-            // Set the rectangle color to red
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-            // Render the rectangle
-            SDL_RenderFillRect(renderer, &r);
-        }
-    });
+    world.system<Position, Size2>("DrawPlayer")
+            .kind(OnDraw)
+            .iter([](flecs::iter &it, Position *p, Size2 *s) {
+                SDL_Renderer *renderer = static_cast<SDL_Renderer *>(it.world().get_context());
+                // Drawing each player
+                for (auto i: it) {
+                    // Creating a new Rectangle
+                    SDL_Rect r;
+                    r.x = (int) p[i].x;
+                    r.y = (int) p[i].y;
+                    r.w = (int) s[i].x;
+                    r.h = (int) s[i].y;
+                    // Set the rectangle color to red
+                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                    // Render the rectangle
+                    SDL_RenderFillRect(renderer, &r);
+                }
+            });
 
     world.system("SetupDraw").kind(BeforeDraw).iter([](flecs::iter &it) {
         SDL_Renderer *renderer = static_cast<SDL_Renderer *>(it.world().get_context());
