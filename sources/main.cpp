@@ -83,10 +83,7 @@ int run_game(SDL_Renderer *renderer) {
         // movement peed limiter
         float speed_limiter = 1.0;
         for (auto i: it) {
-            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT])
-                 || (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT])
-                || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT])
-                || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
+            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT]) || (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
                 speed_limiter = 0.707;
             }
 
