@@ -33,6 +33,12 @@ SDL_Event evt;
 
 
 int main(int argc, char *argv[]) {
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
 #ifdef __EMSCRIPTEN__
     SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas", SDL_HINT_OVERRIDE);
 #endif
@@ -40,8 +46,19 @@ int main(int argc, char *argv[]) {
     SDL_Window *window =
             SDL_CreateWindow("Flecs Web Demo!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                              SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
+    if (window == nullptr) {
+        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
     // Setup renderer
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+    if (renderer == nullptr) {
+        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
     // Setup and run the game
     run_game(renderer);
     // Cleanup
