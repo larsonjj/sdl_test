@@ -51,6 +51,8 @@ int main(int argc, char *argv[]) {
 }
 
 int run_game(SDL_Renderer *renderer) {
+    // movement peed limiter
+    float speed_limiter = 1.0;
     // Set Sdl renderer as ecs context
     world.set_context(renderer);
 
@@ -72,21 +74,25 @@ int run_game(SDL_Renderer *renderer) {
     Player.set<Position>({20, 20})
             .set<Size2>({32, 32});
 
-    world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
+    world.system<Position>("MovePlayer").kind(OnUpdate).iter([&speed_limiter](flecs::iter &it, Position *p) {
         // Get keyboard state
         const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
         for (auto i: it) {
+            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT]) || (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
+                speed_limiter = 0.707;
+            }
+
             if (keystate[SDL_SCANCODE_UP]) {
-                p[i].y -= MOVE_SPEED * it.delta_time();
+                p[i].y -= MOVE_SPEED * speed_limiter * it.delta_time();
             }
             if (keystate[SDL_SCANCODE_DOWN]) {
-                p[i].y += MOVE_SPEED * it.delta_time();
+                p[i].y += MOVE_SPEED * speed_limiter * it.delta_time();
             }
             if (keystate[SDL_SCANCODE_LEFT]) {
-                p[i].x -= MOVE_SPEED * it.delta_time();
+                p[i].x -= MOVE_SPEED * speed_limiter * it.delta_time();
             }
             if (keystate[SDL_SCANCODE_RIGHT]) {
-                p[i].x += MOVE_SPEED * it.delta_time();
+                p[i].x += MOVE_SPEED * speed_limiter * it.delta_time();
             }
         }
     });
@@ -97,10 +103,10 @@ int run_game(SDL_Renderer *renderer) {
         for (auto i: it) {
             // Creating a new Rectangle
             SDL_Rect r;
-            r.x = p[i].x;
-            r.y = p[i].y;
-            r.w = s[i].x;
-            r.h = s[i].y;
+            r.x = (int) p[i].x;
+            r.y = (int) p[i].y;
+            r.w = (int) s[i].x;
+            r.h = (int) s[i].y;
             // Set the rectangle color to red
             SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
             // Render the rectangle
@@ -130,7 +136,9 @@ int run_game(SDL_Renderer *renderer) {
     while (running) { main_loop(); }
 #endif
     // Cleanup flecs
-    return ecs_fini(world);
+    ecs_quit(world);
+
+    return 0;
 }
 
 void main_loop() {
