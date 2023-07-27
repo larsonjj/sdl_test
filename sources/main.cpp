@@ -4,7 +4,11 @@
 #include <emscripten.h>
 #endif
 
-#define MOVE_SPEED 500
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+const int SCREEN_FPS = 60;
+const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
+const int MOVE_SPEED = 500;
 
 struct Position {
     float x;
@@ -27,6 +31,7 @@ flecs::world world;
 // SDL Events to make our program interactive
 SDL_Event evt;
 
+
 int main(int argc, char *argv[]) {
 #ifdef __EMSCRIPTEN__
     SDL_SetHintWithPriority(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas", SDL_HINT_OVERRIDE);
@@ -36,7 +41,7 @@ int main(int argc, char *argv[]) {
             "Flecs Web Demo!",
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
-            800, 600,
+            SCREEN_WIDTH, SCREEN_HEIGHT,
             SDL_WINDOW_RESIZABLE);
     // Setup renderer
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -51,8 +56,6 @@ int main(int argc, char *argv[]) {
 }
 
 int run_game(SDL_Renderer *renderer) {
-    // movement peed limiter
-    float speed_limiter = 1.0;
     // Set Sdl renderer as ecs context
     world.set_context(renderer);
 
@@ -74,11 +77,16 @@ int run_game(SDL_Renderer *renderer) {
     Player.set<Position>({20, 20})
             .set<Size2>({32, 32});
 
-    world.system<Position>("MovePlayer").kind(OnUpdate).iter([&speed_limiter](flecs::iter &it, Position *p) {
+    world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
         // Get keyboard state
         const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
+        // movement peed limiter
+        float speed_limiter = 1.0;
         for (auto i: it) {
-            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT]) || (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT]) || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
+            if ((keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_LEFT])
+                 || (keystate[SDL_SCANCODE_UP] && keystate[SDL_SCANCODE_RIGHT])
+                || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_RIGHT])
+                || (keystate[SDL_SCANCODE_DOWN] && keystate[SDL_SCANCODE_LEFT])) {
                 speed_limiter = 0.707;
             }
 
