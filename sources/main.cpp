@@ -78,8 +78,13 @@ int run_game(SDL_Renderer *renderer) {
     auto currentTime = (float) SDL_GetTicks();
     float accumulator = 0.0f;
 
+    // Create context with renderer and physics world
+    struct Context {
+        SDL_Renderer *renderer;
+    };
+
     // Set Sdl renderer as ecs context
-    world.set_context(renderer);
+    world.set_context(new Context({renderer}));
 
     flecs::entity OnUpdate = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);
     flecs::entity BeforeDraw = world.entity().add(flecs::Phase).depends_on(OnUpdate);
@@ -92,7 +97,7 @@ int run_game(SDL_Renderer *renderer) {
     world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
         // Get keyboard state
         const Uint8 *key_state = SDL_GetKeyboardState(nullptr);
-        // movement peed limiter
+        // movement speed limiter
         float speed_limiter = 1.0;
         for (auto i: it) {
             if ((key_state[SDL_SCANCODE_UP] && key_state[SDL_SCANCODE_LEFT]) ||
@@ -120,7 +125,9 @@ int run_game(SDL_Renderer *renderer) {
     world.system<Position, Size2>("DrawPlayer")
             .kind(OnDraw)
             .iter([](flecs::iter &it, Position *p, Size2 *s) {
-                SDL_Renderer *renderer = static_cast<SDL_Renderer *>(it.world().get_context());
+                auto context = static_cast<Context *>(it.world().get_context());
+                SDL_Renderer *renderer = context->renderer;
+
                 // Drawing each player
                 for (auto i: it) {
                     // Creating a new Rectangle
@@ -137,7 +144,8 @@ int run_game(SDL_Renderer *renderer) {
             });
 
     world.system("SetupDraw").kind(BeforeDraw).iter([](flecs::iter &it) {
-        SDL_Renderer *renderer = static_cast<SDL_Renderer *>(it.world().get_context());
+        auto context = static_cast<Context *>(it.world().get_context());
+        SDL_Renderer *renderer = context->renderer;
         // Clearing the current render target with black
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 1);
         SDL_RenderClear(renderer);
@@ -153,14 +161,14 @@ int run_game(SDL_Renderer *renderer) {
         auto newTime = (float) SDL_GetTicks();
         float frameTime = newTime - currentTime;
 
+        // Prevent from going too fast
         if (frameTime > SCREEN_TICKS_PER_FRAME) { frameTime = SCREEN_TICKS_PER_FRAME; }
 
         currentTime = newTime;
         accumulator += frameTime;
 
         while (accumulator >= deltaTime) {
-            // Advance Game world
-            world.progress();
+            main_loop();
             accumulator -= deltaTime;
         }
 
@@ -187,4 +195,22 @@ int run_game(SDL_Renderer *renderer) {
     ecs_quit(world);
 
     return 0;
+}
+
+void main_loop() {
+    // Advance Game world
+    world.progress();
+    // Check If user want to quit
+    while (SDL_PollEvent(&evt)) {
+        switch (evt.type) {
+            case SDL_QUIT:
+#ifdef __EMSCRIPTEN__
+                emscripten_cancel_main_loop();
+#endif
+#ifndef __EMSCRIPTEN__
+                running = false;
+#endif
+                break;
+        }
+    }
 }
