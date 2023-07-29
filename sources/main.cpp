@@ -74,13 +74,16 @@ int main(int argc, char *argv[]) {
 }
 
 int run_game(SDL_Renderer *renderer) {
+    float deltaTime = 0.01;
+    auto currentTime = (float) SDL_GetTicks();
+    float accumulator = 0.0f;
+
     // Set Sdl renderer as ecs context
     world.set_context(renderer);
 
     flecs::entity OnUpdate = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);
     flecs::entity BeforeDraw = world.entity().add(flecs::Phase).depends_on(OnUpdate);
     flecs::entity OnDraw = world.entity().add(flecs::Phase).depends_on(BeforeDraw);
-    flecs::entity AfterDraw = world.entity().add(flecs::Phase).depends_on(OnDraw);
 
     flecs::entity Player = world.entity();
 
@@ -140,40 +143,48 @@ int run_game(SDL_Renderer *renderer) {
         SDL_RenderClear(renderer);
     });
 
-    world.system("PresentDraw").kind(AfterDraw).iter([](flecs::iter &it) {
-        SDL_Renderer *renderer = static_cast<SDL_Renderer *>(it.world().get_context());
-        // Render the rectangles to the screen
-        SDL_RenderPresent(renderer);
-    });
-
 // Setup gameplay loops
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(main_loop, 0, 1);
 #endif
 #ifndef __EMSCRIPTEN__
     running = true;
-    while (running) { main_loop(); }
+    while (running) {
+        auto newTime = (float) SDL_GetTicks();
+        float frameTime = newTime - currentTime;
+
+        if (frameTime > SCREEN_TICKS_PER_FRAME) { frameTime = SCREEN_TICKS_PER_FRAME; }
+
+        currentTime = newTime;
+        accumulator += frameTime;
+
+        while (accumulator >= deltaTime) {
+            // Advance Game world
+            world.progress();
+            accumulator -= deltaTime;
+        }
+
+        // Render the rectangles to the screen
+        SDL_RenderPresent(renderer);
+
+
+        // Check If user want to quit
+        while (SDL_PollEvent(&evt)) {
+            switch (evt.type) {
+                case SDL_QUIT:
+#ifdef __EMSCRIPTEN__
+                    emscripten_cancel_main_loop();
+#endif
+#ifndef __EMSCRIPTEN__
+                    running = false;
+#endif
+                    break;
+            }
+        }
+    }
 #endif
     // Cleanup flecs
     ecs_quit(world);
 
     return 0;
-}
-
-void main_loop() {
-    // Advance Game world
-    world.progress(0);
-    // Check If user want to quit
-    while (SDL_PollEvent(&evt)) {
-        switch (evt.type) {
-            case SDL_QUIT:
-#ifdef __EMSCRIPTEN__
-                emscripten_cancel_main_loop();
-#endif
-#ifndef __EMSCRIPTEN__
-                running = false;
-#endif
-                break;
-        }
-    }
 }

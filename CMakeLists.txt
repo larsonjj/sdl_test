@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.25)
-project(sdl_test VERSION  0.1.0)
+cmake_minimum_required(VERSION 3.22.1)
+project(sdl_test VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,12 +14,12 @@ set(FETCHCONTENT_QUIET FALSE)
 function(add_git_dependency libName gitURL gitTag)
     FetchContent_Declare(${libName}
             GIT_REPOSITORY ${gitURL}
-            GIT_TAG        ${gitTag}
-            GIT_SHALLOW    TRUE
-            GIT_PROGRESS   TRUE
-            )
+            GIT_TAG ${gitTag}
+            GIT_SHALLOW TRUE
+            GIT_PROGRESS TRUE
+    )
     FetchContent_MakeAvailable(${libName})
-#    target_compile_options(${libName} PUBLIC "-w")
+    #    target_compile_options(${libName} PUBLIC "-w")
 endfunction()
 
 # Add SDL
