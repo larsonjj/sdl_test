@@ -1,14 +1,15 @@
 #include "flecs.h"
 #include <SDL2/SDL.h>
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH = 320;
+const int SCREEN_HEIGHT = 180;
 const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
-const int MOVE_SPEED = 500;
+const int MOVE_SPEED = 100;
 
 struct Position {
     float x;
@@ -22,6 +23,7 @@ struct Size2 {
 
 
 int run_game(SDL_Renderer *renderer);
+
 void main_loop();
 
 // flag for the game loop
@@ -78,6 +80,10 @@ int run_game(SDL_Renderer *renderer) {
     auto currentTime = (float) SDL_GetTicks();
     float accumulator = 0.0f;
 
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
+
+    SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
     // Create context with renderer and physics world
     struct Context {
         SDL_Renderer *renderer;
@@ -92,7 +98,7 @@ int run_game(SDL_Renderer *renderer) {
 
     flecs::entity Player = world.entity();
 
-    Player.set<Position>({20, 20}).set<Size2>({32, 32});
+    Player.set<Position>({20, 20}).set<Size2>({8, 8});
 
     world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
         // Get keyboard state
