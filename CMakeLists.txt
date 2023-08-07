@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.25.6)
 project(sdl_test VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -19,7 +19,6 @@ function(add_git_dependency libName gitURL gitTag)
             GIT_PROGRESS TRUE
     )
     FetchContent_MakeAvailable(${libName})
-    #    target_compile_options(${libName} PUBLIC "-w")
 endfunction()
 
 # Add SDL
@@ -27,29 +26,28 @@ option(BUILD_SHARED_LIBS "Build SDL2 as a shared library" OFF) # don't build the
 add_git_dependency(
         SDL2
         https://github.com/libsdl-org/SDL.git
-        release-2.28.1
+        release-2.28.2
 )
 
+# Add SDL Image
 option(SDL2IMAGE_BUILD_SHARED_LIBS "Build SDL2_Image as a shared library" OFF) # don't build the shared library for SDL_image
 option(SDL2IMAGE_INSTALL "" OFF) # disable install target for SDL Image
-# Add SDL Image
 add_git_dependency(
         SDL2_image
         https://github.com/libsdl-org/SDL_image.git
         release-2.6.3
 )
 
+# Add SDL Mixer
 option(SDL2MIXER_VENDORED "" ON)
 option(SDL2MIXER_BUILD_SHARED_LIBS "Build SDL2_Mixer as a shared library" OFF)
-option(SDL2MIXER_OPUS "" OFF)
-option(SDL2MIXER_FLAC_LIBFLAC "" OFF)
-# Add SDL Mixer
 add_git_dependency(
         SDL2_mixer
         https://github.com/libsdl-org/SDL_mixer.git
         release-2.6.3
 )
 
+# Add SDL_TTF
 option(SDL2TTF_BUILD_SHARED_LIBS "Build SDL2_TTF as a shared library" OFF)
 option(SDL2TTF_VENDORED "" ON)
 add_git_dependency(
@@ -67,15 +65,15 @@ add_git_dependency(
 )
 
 # Add Box2d
-#option(BOX2D_BUILD_UNIT_TESTS "Build the Box2D unit tests" OFF)
-#option(BOX2D_BUILD_TESTBED "Build the Box2D testbed" OFF)
-#option(BOX2D_BUILD_DOCS "Build the Box2D documentation" OFF)
-#option(BUILD_SHARED_LIBS "Build Box2D as a shared library" OFF)
-#add_git_dependency(
-#        box2d
-#        https://github.com/erincatto/box2d
-#        v2.4.1
-#)
+option(BOX2D_BUILD_UNIT_TESTS "Build the Box2D unit tests" OFF)
+option(BOX2D_BUILD_TESTBED "Build the Box2D testbed" OFF)
+option(BOX2D_BUILD_DOCS "Build the Box2D documentation" OFF)
+option(BUILD_SHARED_LIBS "Build Box2D as a shared library" OFF)
+add_git_dependency(
+        box2d
+        https://github.com/erincatto/box2d
+        v2.4.1
+)
 
 ##########################################################################################
 # Project executable setup
