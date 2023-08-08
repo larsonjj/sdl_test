@@ -56,17 +56,6 @@ add_git_dependency(
         release-2.20.2
 )
 
-# Add Box2d
-option(BOX2D_BUILD_UNIT_TESTS "Build the Box2D unit tests" OFF)
-option(BOX2D_BUILD_TESTBED "Build the Box2D testbed" OFF)
-option(BOX2D_BUILD_DOCS "Build the Box2D documentation" OFF)
-option(BUILD_SHARED_LIBS "Build Box2D as a shared library" OFF)
-add_git_dependency(
-        box2d
-        https://github.com/erincatto/box2d
-        v2.4.1
-)
-
 ##########################################################################################
 # Project executable setup
 ##########################################################################################

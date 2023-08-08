@@ -8,17 +8,6 @@ const int SCREEN_WIDTH = 320;
 const int SCREEN_HEIGHT = 180;
 const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
-const int MOVE_SPEED = 100;
-
-struct Position {
-    float x;
-    float y;
-};
-
-struct Size2 {
-    float x;
-    float y;
-};
 
 
 int run_game(SDL_Renderer *renderer);
@@ -47,7 +36,7 @@ int main(int argc, char *argv[]) {
 #endif
     // Setup window
     SDL_Window *window =
-            SDL_CreateWindow("Flecs Web Demo!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            SDL_CreateWindow("SDL Demo!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                              SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
     if (window == nullptr) {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
