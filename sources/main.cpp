@@ -1,4 +1,3 @@
-#include "flecs.h"
 #include <SDL2/SDL.h>
 
 #ifdef __EMSCRIPTEN__
@@ -28,8 +27,6 @@ void main_loop();
 
 // flag for the game loop
 bool running = false;
-// Create a world
-flecs::world world;
 // SDL Events to make our program interactive
 SDL_Event evt;
 
@@ -89,74 +86,6 @@ int run_game(SDL_Renderer *renderer) {
         SDL_Renderer *renderer;
     };
 
-    // Set Sdl renderer as ecs context
-    world.set_context(new Context({renderer}));
-
-    flecs::entity OnUpdate = world.entity().add(flecs::Phase).depends_on(flecs::OnUpdate);
-    flecs::entity BeforeDraw = world.entity().add(flecs::Phase).depends_on(OnUpdate);
-    flecs::entity OnDraw = world.entity().add(flecs::Phase).depends_on(BeforeDraw);
-
-    flecs::entity Player = world.entity();
-
-    Player.set<Position>({20, 20}).set<Size2>({8, 8});
-
-    world.system<Position>("MovePlayer").kind(OnUpdate).iter([](flecs::iter &it, Position *p) {
-        // Get keyboard state
-        const Uint8 *key_state = SDL_GetKeyboardState(nullptr);
-        // movement speed limiter
-        float speed_limiter = 1.0;
-        for (auto i: it) {
-            if ((key_state[SDL_SCANCODE_UP] && key_state[SDL_SCANCODE_LEFT]) ||
-                (key_state[SDL_SCANCODE_UP] && key_state[SDL_SCANCODE_RIGHT]) ||
-                (key_state[SDL_SCANCODE_DOWN] && key_state[SDL_SCANCODE_RIGHT]) ||
-                (key_state[SDL_SCANCODE_DOWN] && key_state[SDL_SCANCODE_LEFT])) {
-                speed_limiter = 0.707;
-            }
-
-            if (key_state[SDL_SCANCODE_UP]) {
-                p[i].y -= MOVE_SPEED * speed_limiter * it.delta_time();
-            }
-            if (key_state[SDL_SCANCODE_DOWN]) {
-                p[i].y += MOVE_SPEED * speed_limiter * it.delta_time();
-            }
-            if (key_state[SDL_SCANCODE_LEFT]) {
-                p[i].x -= MOVE_SPEED * speed_limiter * it.delta_time();
-            }
-            if (key_state[SDL_SCANCODE_RIGHT]) {
-                p[i].x += MOVE_SPEED * speed_limiter * it.delta_time();
-            }
-        }
-    });
-
-    world.system<Position, Size2>("DrawPlayer")
-            .kind(OnDraw)
-            .iter([](flecs::iter &it, Position *p, Size2 *s) {
-                auto context = static_cast<Context *>(it.world().get_context());
-                SDL_Renderer *renderer = context->renderer;
-
-                // Drawing each player
-                for (auto i: it) {
-                    // Creating a new Rectangle
-                    SDL_Rect r;
-                    r.x = (int) p[i].x;
-                    r.y = (int) p[i].y;
-                    r.w = (int) s[i].x;
-                    r.h = (int) s[i].y;
-                    // Set the rectangle color to red
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-                    // Render the rectangle
-                    SDL_RenderFillRect(renderer, &r);
-                }
-            });
-
-    world.system("SetupDraw").kind(BeforeDraw).iter([](flecs::iter &it) {
-        auto context = static_cast<Context *>(it.world().get_context());
-        SDL_Renderer *renderer = context->renderer;
-        // Clearing the current render target with black
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 1);
-        SDL_RenderClear(renderer);
-    });
-
 // Setup gameplay loops
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop(main_loop, 0, 1);
@@ -197,15 +126,11 @@ int run_game(SDL_Renderer *renderer) {
         }
     }
 #endif
-    // Cleanup flecs
-    ecs_quit(world);
 
     return 0;
 }
 
 void main_loop() {
-    // Advance Game world
-    world.progress();
     // Check If user want to quit
     while (SDL_PollEvent(&evt)) {
         switch (evt.type) {

@@ -56,14 +56,6 @@ add_git_dependency(
         release-2.20.2
 )
 
-# Add Flecs
-option(FLECS_SHARED "Build Flecs as a shared library" OFF)
-add_git_dependency(
-        flecs
-        https://github.com/SanderMertens/flecs
-        v3.2.4
-)
-
 # Add Box2d
 option(BOX2D_BUILD_UNIT_TESTS "Build the Box2D unit tests" OFF)
 option(BOX2D_BUILD_TESTBED "Build the Box2D testbed" OFF)
@@ -90,7 +82,7 @@ add_executable(${PROJECT_NAME})
 target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} flecs::flecs_static SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static freetype SDL2_ttf::SDL2_ttf-static)
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2main SDL2::SDL2-static SDL2_image::SDL2_image-static SDL2_mixer::SDL2_mixer-static freetype SDL2_ttf::SDL2_ttf-static)
 
 ##########################################################################################
 # Project build settings
